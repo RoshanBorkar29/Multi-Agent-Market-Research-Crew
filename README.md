@@ -1,2 +1,1 @@
-# FinPilot-Agentic-Personal-Finance-Intelligence-Platform
- An AI-powered personal finance decision-support platform that analyzes bank/credit-card statements, detects spending patterns and recurring payments, tracks budgets and savings goals, and provides grounded natural-language financial insights through a stateful LangGraph agent.
+This is a multi-agent market research platform built with CrewAI that analyzes startup, product, and business ideas through specialized AI agents. It combines market research, competitor analysis, customer research, product strategy, and evidence validation to generate structured, source-backed market research reports.
