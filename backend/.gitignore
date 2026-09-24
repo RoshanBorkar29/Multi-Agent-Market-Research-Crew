@@ -1,0 +1,97 @@
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ==============================
+# Virtual Environment
+# ==============================
+.venv/
+venv/
+env/
+ENV/
+
+# ==============================
+# Environment Variables / Secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# IDE / Editors
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==============================
+# Testing / Coverage
+# ==============================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ==============================
+# Build / Packaging
+# ==============================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ==============================
+# Logs
+# ==============================
+*.log
+logs/
+
+# ==============================
+# Temporary Files
+# ==============================
+*.tmp
+*.temp
+*.bak
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Jupyter
+# ==============================
+.ipynb_checkpoints/
+
+# ==============================
+# Local Database
+# ==============================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==============================
+# LangGraph / LangChain local data
+# ==============================
+.langgraph/
+.checkpoints/
+
+# ==============================
+# Test outputs / generated reports
+# ==============================
+test_output/
+outputs/
+reports/
+
+# ==============================
+# Local secrets / API credentials
+# ==============================
+*.pem
+*.key
+secrets/
+credentials/
