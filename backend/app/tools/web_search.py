@@ -5,16 +5,15 @@ from tavily import TavilyClient
 
 load_dotenv()
 
-
 tavily_client = TavilyClient(
     api_key=os.getenv("TAVILY_API_KEY")
 )
 
 
-def web_search(query: str, max_results: int = 5) -> list[dict]:
-    """
-    Search the web and return structured search results.
-    """
+def web_search(
+    query: str,
+    max_results: int = 5
+) -> list[dict]:
 
     response = tavily_client.search(
         query=query,
@@ -22,14 +21,20 @@ def web_search(query: str, max_results: int = 5) -> list[dict]:
         max_results=max_results
     )
 
-    results = []
+    results = response.get("results", [])
 
-    for result in response.get("results", []):
-        results.append({
+    formatted_results = []
+
+    for result in results:
+
+        if not isinstance(result, dict):
+            continue
+
+        formatted_results.append({
             "title": result.get("title", ""),
             "url": result.get("url", ""),
             "content": result.get("content", ""),
             "score": result.get("score", 0),
         })
 
-    return results
+    return formatted_results

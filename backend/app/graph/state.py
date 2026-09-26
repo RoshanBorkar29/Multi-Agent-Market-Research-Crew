@@ -1,32 +1,46 @@
-from typing import TypedDict,Any
-from app.schemas.reports import (
-    MarketReport,
-    CompetitorReport,
-    CustomerReport,
-    ProductStrategy,
-    EvidenceReport,
-    BusinessAnalysis,
-)
+from typing import TypedDict, Any, Annotated
+import operator
+
 
 class ResearchState(TypedDict):
-    idea:str
-    target_market:str
-    research_plan:list[str]
 
-    market_report:MarketReport|None
-    competitor_report:CompetitorReport|None
-    customer_report:CustomerReport|None
+    # Input
+    idea: str
+    target_market: str
 
-    product_strategy:ProductStrategy|None
-    evidence_report: EvidenceReport|None
+    # Planner
+    research_plan: list[str]
+
+    # Research reports
+    market_report: dict[str, Any]
+    competitor_report: dict[str, Any]
+    customer_report: dict[str, Any]
+
+    # Strategy
+    product_strategy: dict[str, Any]
+
+    # Evidence
+    evidence_report: dict[str, Any]
     evidence_valid: bool
-
     unsupported_claims: list[str]
-    business_analysis: BusinessAnalysis|None
-    sources: list[dict[str, Any]]   
 
+    # Business analysis
+    business_analysis: dict[str, Any]
+
+    # Shared research sources
+    sources: Annotated[
+        list[dict[str, Any]],
+        operator.add
+    ]
+
+    # Execution tracking
     current_agent: str
-    errors: list[str]
- 
-    research_iterations: int 
+    errors: Annotated[
+        list[str],
+        operator.add
+    ]
+
+    research_iterations: int
+
+    # Final output
     final_report: dict[str, Any]
