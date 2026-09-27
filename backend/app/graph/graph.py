@@ -9,6 +9,7 @@ from app.graph.nodes import (
     product_agent_node,
     evidence_critic_node,
     business_analysis_node,
+    research_planner_node
 )
 
 def evidence_router(state:ResearchState):
@@ -34,6 +35,7 @@ def build_graph():
 
     graph = StateGraph(ResearchState)
 
+    graph.add_node("research_planner",research_planner_node)
     # Add nodes
     graph.add_node(
         "market_research",
@@ -56,19 +58,20 @@ def build_graph():
     )
     graph.add_node("evidence_critic",evidence_critic_node)
     graph.add_node("business_analysis",business_analysis_node)
+    graph.add_edge(START,"research_planner")
     # Fan-out
     graph.add_edge(
-        START,
+        "research_planner",
         "market_research"
     )
 
     graph.add_edge(
-        START,
+        "research_planner",
         "competitor_research"
     )
 
     graph.add_edge(
-        START,
+        "research_planner",
         "customer_research"
     )
     graph.add_edge(

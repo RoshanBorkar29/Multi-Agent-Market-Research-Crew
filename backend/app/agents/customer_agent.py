@@ -1,31 +1,16 @@
-import os
-
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-
+from app.agents.recursive_setup import customer_llm
 from app.tools.web_search import web_search
 from app.tools.web_scrapper import scrape_url
 
-load_dotenv()
 
-llm = ChatGroq(
-    model="openai/gpt-oss-120b",
-    temperature=0,
-    api_key=os.getenv("GROQ_API_KEY"),
-)
-
-
-def customer_research_agent(
+def create_customer_prompt(
     idea: str,
-    target_market: str
-) -> dict:
+    target_market: str,
+    scraped_sources: list[dict]
+) -> str:
 
-    # --------------------------------------------------
-    # 1. Generate research queries
-    # --------------------------------------------------
-
-    query_prompt = f"""
-You are a customer research analyst.
+    return f"""
+You are an experienced customer research analyst.
 
 Business/product idea:
 {idea}
@@ -33,31 +18,40 @@ Business/product idea:
 Target market:
 {target_market}
 
-Generate exactly 4 web search queries for understanding
-the potential customers of this product.
+Research collected from the web:
+{scraped_sources}
 
-Cover:
+Provide a structured customer research report in JSON format covering:
 
-1. Target customer segments and personas
-2. Customer pain points and problems
-3. Existing customer solutions and alternatives
-4. Customer needs, buying motivations and adoption barriers
+1. Customer segments (customer_segments: list of strings)
+2. Pain points (pain_points: list of strings)
+3. Jobs-to-be-done (jobs_to_be_done: list of strings)
+4. Customer needs (needs: list of strings)
+5. Buying motivations (buying_motivations: list of strings)
+6. Adoption barriers (barriers: list of strings)
+7. Key findings (key_findings: list of strings)
+8. Evidence supporting important claims (evidence: list of objects with fields claim, source_title, url, supporting_text, source_type)
 
-Return ONLY the queries, one per line.
+Rules:
+
+- Do not invent customer data.
+- Do not invent statistics.
+- Do not make unsupported claims.
+- Clearly distinguish evidence from assumptions.
+- Base conclusions on the provided sources.
+
+Return only a valid JSON object conforming to the schema.
 """
 
-    query_response = llm.invoke(query_prompt)
 
-    queries = [
-        q.strip()
-        for q in query_response.content.split("\n")
-        if q.strip()
-    ]
-
-    queries = queries[:4]
+def customer_research_agent(
+    idea: str,
+    target_market: str,
+    queries: list[str]
+):
 
     # --------------------------------------------------
-    # 2. Web search
+    # 1. WEB SEARCH
     # --------------------------------------------------
 
     search_results = []
@@ -77,11 +71,12 @@ Return ONLY the queries, one per line.
         except Exception as e:
 
             print(
-                f"Search failed for '{query}': {e}"
+                f"Search failed for "
+                f"'{query}': {e}"
             )
 
     # --------------------------------------------------
-    # 3. Remove duplicate URLs
+    # 2. REMOVE DUPLICATES
     # --------------------------------------------------
 
     unique_results = {}
@@ -94,126 +89,63 @@ Return ONLY the queries, one per line.
         url = result.get("url")
 
         if url and url not in unique_results:
+
             unique_results[url] = result
 
-    search_results = list(
+    # --------------------------------------------------
+    # 3. SELECT TOP 3 SOURCES
+    # --------------------------------------------------
+
+    selected_results = list(
         unique_results.values()
-    )
+    )[:3]
 
     # --------------------------------------------------
-    # 4. Select useful sources
-    # --------------------------------------------------
-
-    source_prompt = f"""
-You are a customer research source evaluator.
-
-Business/product idea:
-{idea}
-
-Target market:
-{target_market}
-
-Search results:
-{search_results}
-
-Select up to 5 URLs that are most useful for
-understanding the potential customers.
-
-Prefer sources such as:
-
-- customer research
-- industry reports
-- surveys
-- user discussions
-- company/customer studies
-- reliable industry publications
-
-Return ONLY the URLs, one per line.
-"""
-
-    source_response = llm.invoke(
-        source_prompt
-    )
-
-    selected_urls = [
-        url.strip()
-        for url in source_response.content.split("\n")
-        if url.strip().startswith("http")
-    ]
-
-    selected_urls = selected_urls[:5]
-
-    # --------------------------------------------------
-    # 5. Scrape selected sources
+    # 4. SCRAPE
     # --------------------------------------------------
 
     scraped_sources = []
 
-    for url in selected_urls:
+    for result in selected_results:
 
         try:
 
-            page = scrape_url(url)
+            page = scrape_url(
+                result["url"]
+            )
 
             scraped_sources.append(page)
 
         except Exception as e:
-
             print(
-                f"Scraping failed for {url}: {e}"
+                f"Scraping failed for "
+                f"{result.get('url')}: {e}"
             )
+            if result.get("content"):
+                scraped_sources.append({
+                    "url": result.get("url", ""),
+                    "title": result.get("title", ""),
+                    "content": result.get("content", "")
+                })
 
     # --------------------------------------------------
-    # 6. Analyze customer research
+    # 5. ONE LLM CALL
     # --------------------------------------------------
 
-    research_prompt = f"""
-You are an experienced customer research analyst.
-
-Business/product idea:
-{idea}
-
-Target market:
-{target_market}
-
-Research collected from the web:
-{scraped_sources}
-
-Analyze the potential customers.
-
-Provide a structured customer research report containing:
-
-1. Customer segments
-2. Customer personas
-3. Major pain points
-4. Jobs-to-be-done
-5. Customer needs
-6. Buying motivations
-7. Adoption barriers
-8. Existing alternatives
-9. Key customer insights
-
-Important rules:
-
-- Do not invent customer data.
-- Do not invent statistics.
-- Do not make unsupported claims.
-- Clearly distinguish evidence from assumptions.
-- Base conclusions on the provided sources.
-"""
-
-    report_response = llm.invoke(
-        research_prompt
+    prompt = create_customer_prompt(
+        idea,
+        target_market,
+        scraped_sources
     )
 
+    report = customer_llm.invoke(prompt)
+
     # --------------------------------------------------
-    # 7. Return result
+    # 6. RETURN
     # --------------------------------------------------
 
     return {
-        "report": report_response.content,
-
-        "queries": queries,
+        "report": report,
 
         "sources": [
             {

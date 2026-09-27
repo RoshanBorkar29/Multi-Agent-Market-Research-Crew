@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+MAX_SOURCE_CHARS=3500
 
 def scrape_url(url:str)->dict:
     """Extract readable text from a webpage."""
@@ -21,6 +22,7 @@ def scrape_url(url:str)->dict:
         separator=" ",
         strip=True
     )
+    text=text[:MAX_SOURCE_CHARS]
     return {
         "url": url,
         "title": soup.title.string.strip()

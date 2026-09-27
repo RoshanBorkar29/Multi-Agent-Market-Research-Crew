@@ -1,28 +1,16 @@
-import os
-
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-
+from app.agents.recursive_setup import competitor_llm
 from app.tools.web_search import web_search
 from app.tools.web_scrapper import scrape_url
 
-load_dotenv()
 
-llm = ChatGroq(
-    model="meta-llama/llama-4-scout-17b-16e-instruct",
-    temperature=0,
-    api_key=os.getenv("GROQ_API_KEY"),
-)
-
-
-def competitor_research_agent(
+def create_competitor_prompt(
     idea: str,
-    target_market: str
-) -> dict:
+    target_market: str,
+    scraped_sources: list[dict]
+) -> str:
 
-    # 1. Generate competitor-search queries
-    query_prompt = f"""
-You are a competitive intelligence researcher.
+    return f"""
+You are an experienced competitive intelligence analyst.
 
 Business/product idea:
 {idea}
@@ -30,30 +18,48 @@ Business/product idea:
 Target market:
 {target_market}
 
-Generate exactly 4 web search queries to discover competitors.
+Research collected from the web:
+{scraped_sources}
 
-Cover:
-1. Direct competitors
-2. Alternative solutions
-3. Leading companies in this market
-4. Competitor pricing/features
+Provide a structured competitor research report in JSON format covering:
 
-Return ONLY the queries, one per line.
+1. Major competitors (competitors: list of objects with fields name, website, description, pricing, target_customer, key_features, strengths, weaknesses)
+2. Pricing analysis (pricing_analysis: list of strings)
+3. Feature comparison (feature_comparison: list of strings)
+4. Market positioning (positioning: list of strings)
+5. Competitive gaps (competitive_gaps: list of strings)
+6. Key findings (key_findings: list of strings)
+7. Evidence supporting important claims (evidence: list of objects with fields claim, source_title, url, supporting_text, source_type)
+
+Rules:
+
+- Do not invent competitors.
+- Do not invent pricing.
+- Do not invent features.
+- Do not make unsupported claims.
+- Clearly distinguish evidence from assumptions.
+- Base conclusions on the provided sources.
+
+Return only a valid JSON object conforming to the schema.
 """
 
-    query_response = llm.invoke(query_prompt)
 
-    queries = [
-        q.strip()
-        for q in query_response.content.split("\n")
-        if q.strip()
-    ][:4]
+def competitor_research_agent(
+    idea: str,
+    target_market: str,
+    queries: list[str]
+):
 
-    # 2. Search the web
+    # --------------------------------------------------
+    # 1. WEB SEARCH
+    # --------------------------------------------------
+
     search_results = []
 
     for query in queries:
+
         try:
+
             results = web_search(
                 query=query,
                 max_results=5
@@ -63,9 +69,16 @@ Return ONLY the queries, one per line.
                 search_results.extend(results)
 
         except Exception as e:
-            print(f"Search failed: {e}")
 
-    # 3. Remove duplicate URLs
+            print(
+                f"Search failed for "
+                f"'{query}': {e}"
+            )
+
+    # --------------------------------------------------
+    # 2. REMOVE DUPLICATES
+    # --------------------------------------------------
+
     unique_results = {}
 
     for result in search_results:
@@ -78,97 +91,75 @@ Return ONLY the queries, one per line.
         if url and url not in unique_results:
             unique_results[url] = result
 
-    search_results = list(unique_results.values())
+    # --------------------------------------------------
+    # 3. SELECT TOP 3 SOURCES
+    # --------------------------------------------------
 
-    # 4. Ask LLM to select useful competitor sources
-    source_prompt = f"""
-You are a competitive intelligence researcher.
+    selected_results = list(
+        unique_results.values()
+    )[:3]
 
-Business idea:
-{idea}
+    # --------------------------------------------------
+    # 4. SCRAPE
+    # --------------------------------------------------
 
-Target market:
-{target_market}
-
-Search results:
-{search_results}
-
-Select up to 5 URLs that are most useful for competitor research.
-
-Prefer:
-- official competitor websites
-- official pricing pages
-- product pages
-- reliable industry sources
-
-Return ONLY URLs, one per line.
-"""
-
-    source_response = llm.invoke(source_prompt)
-
-    selected_urls = [
-        url.strip()
-        for url in source_response.content.split("\n")
-        if url.strip().startswith("http")
-    ][:5]
-
-    # 5. Scrape selected sources
     scraped_sources = []
 
-    for url in selected_urls:
+    for result in selected_results:
+
         try:
-            page = scrape_url(url)
+
+            page = scrape_url(
+                result["url"]
+            )
+
             scraped_sources.append(page)
 
         except Exception as e:
-            print(f"Scraping failed for {url}: {e}")
+            print(
+                f"Scraping failed for "
+                f"{result.get('url')}: {e}"
+            )
+            if result.get("content"):
+                scraped_sources.append({
+                    "url": result.get("url", ""),
+                    "title": result.get("title", ""),
+                    "content": result.get("content", "")
+                })
 
-    # 6. Analyze competitors
-    research_prompt = f"""
-You are an experienced competitive intelligence analyst.
+    # --------------------------------------------------
+    # 5. ONE LLM CALL
+    # --------------------------------------------------
 
-Business idea:
-{idea}
+    prompt = create_competitor_prompt(
+        idea,
+        target_market,
+        scraped_sources
+    )
 
-Target market:
-{target_market}
+    report = competitor_llm.invoke(prompt)
 
-Research collected from the web:
-{scraped_sources}
-
-Analyze the competitive landscape.
-
-Provide:
-
-1. Major competitors
-2. Competitor descriptions
-3. Pricing
-4. Target customers
-5. Key features
-6. Competitor strengths
-7. Competitor weaknesses
-8. Market positioning
-9. Competitive gaps
-10. Key findings
-
-Rules:
-- Do not invent information.
-- Do not invent pricing.
-- Clearly distinguish evidence from assumptions.
-- Base conclusions on the provided research.
-"""
-
-    report_response = llm.invoke(research_prompt)
+    # --------------------------------------------------
+    # 6. RETURN
+    # --------------------------------------------------
 
     return {
-        "report": report_response.content,
-        "queries": queries,
+        "report": report,
+
         "sources": [
             {
-                "title": source.get("title", ""),
-                "url": source.get("url", "")
+                "title": source.get(
+                    "title",
+                    ""
+                ),
+                "url": source.get(
+                    "url",
+                    ""
+                )
             }
+
             for source in scraped_sources
+
             if isinstance(source, dict)
         ]
     }

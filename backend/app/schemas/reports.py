@@ -1,16 +1,17 @@
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class Evidence(BaseModel):
-    claim: str
-    source_title: str
-    url: str
-    supporting_text: str = ""
-    source_type: str = "web"
+    claim: str = ""
+    source_title: Optional[str] = ""
+    url: Optional[str] = ""
+    supporting_text: Optional[str] = ""
+    source_type: Optional[str] = "web"
 
 
 class MarketReport(BaseModel):
-    market_overview: str
+    market_overview: Optional[str] = ""
 
     market_segments: list[str] = Field(default_factory=list)
 
@@ -28,11 +29,11 @@ class MarketReport(BaseModel):
 
 
 class Competitor(BaseModel):
-    name: str
-    website: str = ""
-    description: str = ""
-    pricing: str = ""
-    target_customer: str = ""
+    name: str = ""
+    website: Optional[str] = ""
+    description: Optional[str] = ""
+    pricing: Optional[str] = ""
+    target_customer: Optional[str] = ""
     key_features: list[str] = Field(default_factory=list)
     strengths: list[str] = Field(default_factory=list)
     weaknesses: list[str] = Field(default_factory=list)
@@ -73,7 +74,7 @@ class CustomerReport(BaseModel):
 
 
 class ProductStrategy(BaseModel):
-    value_proposition: str = ""
+    value_proposition: Optional[str] = ""
 
     mvp_features: list[str] = Field(default_factory=list)
 
@@ -81,7 +82,7 @@ class ProductStrategy(BaseModel):
 
     differentiators: list[str] = Field(default_factory=list)
 
-    positioning: str = ""
+    positioning: Optional[str] = ""
 
     recommendations: list[str] = Field(default_factory=list)
 
@@ -95,11 +96,11 @@ class EvidenceReport(BaseModel):
 
     source_quality_issues: list[str] = Field(default_factory=list)
 
-    overall_assessment: str = ""
+    overall_assessment: Optional[str] = ""
 
 
 class BusinessAnalysis(BaseModel):
-    business_opportunity: str = ""
+    business_opportunity: Optional[str] = ""
 
     revenue_models: list[str] = Field(default_factory=list)
 

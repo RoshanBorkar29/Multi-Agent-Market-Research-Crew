@@ -1,4 +1,9 @@
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 from app.graph.graph import build_graph
+from app.schemas.research import ResearchPlan
 
 
 def main():
@@ -9,30 +14,41 @@ def main():
         "idea": "AI-powered resume screening platform",
         "target_market": "India",
 
-        "research_plan": [],
+        # Research Planner will populate this
+        "research_plan": ResearchPlan(),
 
-        "market_report": {},
-        "competitor_report": {},
-        "customer_report": {},
+        # Research agents will populate these
+        "market_report": None,
+        "competitor_report": None,
+        "customer_report": None,
 
-        "product_strategy": {},
+        # Downstream agents will populate these
+        "product_strategy": None,
+        "evidence_report": None,
+        "business_analysis": None,
 
-        "evidence_report": {},
-        "evidence_valid": False,
-        "unsupported_claims": [],
-
-        "business_analysis": {},
-
+        # Reducer will merge sources from
+        # Market + Competitor + Customer
         "sources": [],
-        "current_agent": "",
-        "errors": [],
 
         "research_iterations": 0,
-
-        "final_report": {}
     }
 
     result = graph.invoke(initial_state)
+
+    # --------------------------------------------------
+    # RESEARCH PLAN
+    # --------------------------------------------------
+
+    print("\n" + "=" * 60)
+    print("RESEARCH PLAN")
+    print("=" * 60)
+
+    print(result["research_plan"])
+
+    # --------------------------------------------------
+    # MARKET RESEARCH
+    # --------------------------------------------------
 
     print("\n" + "=" * 60)
     print("MARKET RESEARCH")
@@ -40,11 +56,19 @@ def main():
 
     print(result["market_report"])
 
+    # --------------------------------------------------
+    # COMPETITOR RESEARCH
+    # --------------------------------------------------
+
     print("\n" + "=" * 60)
     print("COMPETITOR RESEARCH")
     print("=" * 60)
 
     print(result["competitor_report"])
+
+    # --------------------------------------------------
+    # CUSTOMER RESEARCH
+    # --------------------------------------------------
 
     print("\n" + "=" * 60)
     print("CUSTOMER RESEARCH")
@@ -52,11 +76,39 @@ def main():
 
     print(result["customer_report"])
 
+    # --------------------------------------------------
+    # PRODUCT STRATEGY
+    # --------------------------------------------------
+
     print("\n" + "=" * 60)
     print("PRODUCT STRATEGY")
     print("=" * 60)
 
     print(result["product_strategy"])
+
+    # --------------------------------------------------
+    # EVIDENCE REPORT
+    # --------------------------------------------------
+
+    print("\n" + "=" * 60)
+    print("EVIDENCE REPORT")
+    print("=" * 60)
+
+    print(result["evidence_report"])
+
+    # --------------------------------------------------
+    # BUSINESS ANALYSIS
+    # --------------------------------------------------
+
+    print("\n" + "=" * 60)
+    print("BUSINESS ANALYSIS")
+    print("=" * 60)
+
+    print(result["business_analysis"])
+
+    # --------------------------------------------------
+    # SOURCES
+    # --------------------------------------------------
 
     print("\n" + "=" * 60)
     print("SOURCES")
@@ -64,15 +116,6 @@ def main():
 
     for source in result["sources"]:
         print(source)
-
-    if result["errors"]:
-
-        print("\n" + "=" * 60)
-        print("ERRORS")
-        print("=" * 60)
-
-        for error in result["errors"]:
-            print(error)
 
 
 if __name__ == "__main__":

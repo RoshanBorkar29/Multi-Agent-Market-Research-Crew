@@ -1,146 +1,161 @@
-import os
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-from app.tools.web_scrapper import scrape_url
+from app.agents.recursive_setup import market_llm
 from app.tools.web_search import web_search
+from app.tools.web_scrapper import scrape_url
 
 
-load_dotenv()
+def create_market_prompt(
+    idea: str,
+    target_market: str,
+    scraped_sources: list[dict]
+) -> str:
 
-llm=ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0,
-    model="openai/gpt-oss-120b",
-)
+    return f"""
+You are an experienced market research analyst.
 
-def market_research_agent(idea:str,target_market:str)->dict:
-    query_prompt = f"""
-    You are a market research planner.
+Business/product idea:
+{idea}
 
-    Business/product idea:
-    {idea}
+Target market:
+{target_market}
 
-    Target market:
-    {target_market}
+Research collected from the web:
+{scraped_sources}
 
-    Generate exactly 4 web search queries that would help
-    research this idea.
+Provide a structured market research report in JSON format covering:
 
-    The queries should cover:
-    1. Market overview and demand
-    2. Market trends
-    3. Target customers
-    4. Existing market opportunities
+1. Market overview (market_overview: string)
+2. Market segments (market_segments: list of strings)
+3. Market trends (market_trends: list of strings)
+4. Demand signals (demand_signals: list of strings)
+5. Growth opportunities (growth_opportunities: list of strings)
+6. Risks (risks: list of strings)
+7. Key findings (key_findings: list of strings)
+8. Evidence supporting important claims (evidence: list of objects with fields claim, source_title, url, supporting_text, source_type)
 
-    Return ONLY the queries, one per line.
-    """
-    response=llm.invoke(query_prompt)
+Rules:
 
-    queries=[
-        q.strip()
-        for q in response.content.split("\n")
-        if q.strip()
-    ]
-    queries=queries[:4]
+- Do not invent market statistics.
+- Do not invent growth rates.
+- Do not invent market sizes.
+- Do not make unsupported claims.
+- Clearly distinguish evidence-backed findings from assumptions.
+- Base conclusions on the provided sources.
 
-    search_results=[]
+Return only a valid JSON object conforming to the schema.
+"""
+
+
+def market_research_agent(
+    idea: str,
+    target_market: str,
+    queries: list[str]
+):
+
+    # --------------------------------------------------
+    # 1. WEB SEARCH
+    # --------------------------------------------------
+
+    all_results = []
+
     for query in queries:
+
         try:
-            results=web_search(query,max_results=5)
-            search_results.append(results)
-        except Exception as e:
-            print(f"Search falied for '{query}:{e}")
-
-    unique_results=[]
-    for result in search_results:
-        url=result.get("url")
-        if url and url not in unique_results:
-            unique_results[url]=result
-
-    search_result=list(unique_results.values())
-
-    source_selection_prompt = f"""
-    You are a research source evaluator.
-
-    Research idea:
-    {idea}
-
-    Target market:
-    {target_market}
-
-    Below are web search results:
-
-    {search_results}
-
-    Select the 5 most relevant sources for understanding
-    the market.
-
-    Return ONLY the URLs, one per line.
-    """
-
-    source_response=llm.invoke(source_selection_prompt)
-    selected_urls=[
-        url.strip()
-        for url in source_response.content.split("\n")
-        if url.strip().startswith("http")
-    ]
-    selected_urls=selected_urls[:5]
-
-    scraped_sources=[]
-    for url in selected_urls:
-        try:
-            page=scrape_url(url)
-            scraped_sources.append(page)
-        except Exception as e:            
-            print(
-                f"Scraping failed for {url}: {e}"
+            results = web_search(
+                query=query,
+                max_results=5
             )
 
-    research_prompt = f"""
-    You are an experienced Market Research Analyst.
+            if isinstance(results, list):
+                all_results.extend(results)
 
-    Analyze the research collected for:
+        except Exception as e:
+            print(f"Search failed for '{query}': {e}")
 
-    Idea:
-    {idea}
+    # --------------------------------------------------
+    # 2. REMOVE DUPLICATES
+    # --------------------------------------------------
 
-    Target market:
-    {target_market}
+    unique_results = {}
 
-    Research sources:
+    for result in all_results:
 
-    {scraped_sources}
+        if not isinstance(result, dict):
+            continue
 
-    Produce a structured market research report containing:
+        url = result.get("url")
 
-    1. Market overview
-    2. Relevant market segments
-    3. Current market trends
-    4. Demand signals
-    5. Growth opportunities
-    6. Major risks
-    7. Key findings
+        if url and url not in unique_results:
+            unique_results[url] = result
 
-    Important rules:
+    # --------------------------------------------------
+    # 3. SELECT TOP SOURCES
+    # --------------------------------------------------
 
-    - Do not invent statistics.
-    - Do not make unsupported claims.
-    - Clearly distinguish evidence from assumptions.
-    - Base conclusions on the provided sources.
-    """
+    selected_results = list(
+        unique_results.values()
+    )[:3]
 
-    report_response=llm.invoke(research_prompt)
-    return{
-        "report":report_response.content,
-        "queries":queries,
-         "sources":[
-             {
-                 "title":source.get("title",""),
-                 "url":source.get("url",""),
-             }
-             for source in scraped_sources
-         ]
+    # --------------------------------------------------
+    # 4. SCRAPE
+    # --------------------------------------------------
+
+    scraped_sources = []
+
+    for result in selected_results:
+
+        try:
+
+            page = scrape_url(
+                result["url"]
+            )
+
+            scraped_sources.append(page)
+
+        except Exception as e:
+            print(
+                f"Scraping failed for "
+                f"{result.get('url')}: {e}"
+            )
+            if result.get("content"):
+                scraped_sources.append({
+                    "url": result.get("url", ""),
+                    "title": result.get("title", ""),
+                    "content": result.get("content", "")
+                })
+
+    # --------------------------------------------------
+    # 5. ONE LLM CALL
+    # --------------------------------------------------
+
+    prompt = create_market_prompt(
+        idea,
+        target_market,
+        scraped_sources
+    )
+
+    report = market_llm.invoke(prompt)
+
+    # --------------------------------------------------
+    # 6. RETURN
+    # --------------------------------------------------
+
+    return {
+        "report": report,
+
+        "sources": [
+            {
+                "title": source.get(
+                    "title",
+                    ""
+                ),
+                "url": source.get(
+                    "url",
+                    ""
+                )
+            }
+
+            for source in scraped_sources
+
+            if isinstance(source, dict)
+        ]
     }
-
-##workflow->idea->llm generates research queries->web search->llm selects relevants sources->web scraper->actual relavnt source content
-##->llm analyzes and gives marker report!!

@@ -1,3 +1,4 @@
+import time
 from app.agents.market_agent import market_research_agent
 from app.agents.competitor_agent import competitor_research_agent
 from app.agents.customer_agent import customer_research_agent
@@ -10,75 +11,60 @@ from app.agents.business_agent import (
 from app.agents.critic_agent import (
     evidence_critic_agent
 )
+from app.agents.research_planner_agent import research_planner_agent
 from app.graph.state import ResearchState
 
+def research_planner_node(state:ResearchState):
+    plan=research_planner_agent(
+        idea=state["idea"],
+        target_market=state["target_market"],
+    )
+    return{
+        "research_plan":plan
+    }
 
-def market_research_node(state:ResearchState):
-    try:
-        result=market_research_agent(
-            idea=state["idea"],
-            target_market=state["target_market"]
-        )
-        return{
-            "market_report":{
-                "content":result["report"],
-                "queries":result["queries"],
+def market_research_node(state: ResearchState):
 
-            },
-            "sources":result["sources"],
-            "current_agent":"market_research",
-            "errors":[]
-        }
-    except Exception as e:
-        return{
-            "market_report":{},
-            "current_agent": "market_research",
-            "errors":[str(e)]
-        }
+    result = market_research_agent(
+        idea=state["idea"],
+        target_market=state["target_market"],
+        queries=state["research_plan"].market_queries,
+    )
 
+    return {
+        "market_report": result["report"],
+        "sources": result["sources"],
+    }
 def competitor_research_node(state: ResearchState):
-
-    print("\n========== COMPETITOR NODE START ==========")
 
     result = competitor_research_agent(
         idea=state["idea"],
-        target_market=state["target_market"]
+        target_market=state["target_market"],
+        queries=state["research_plan"].competitor_queries,
     )
-
-    print("\n========== COMPETITOR NODE END ==========")
 
     return {
         "competitor_report": result["report"],
-        "sources": state.get("sources", []) + result["sources"],
-        "current_agent": "competitor_research",
-        "errors": []
+        "sources": result["sources"],
     }
 
-def customer_research_node(state:ResearchState):
-    print("\n========== CUSTOMER NODE START ==========")
+def customer_research_node(state: ResearchState):
 
     result = customer_research_agent(
         idea=state["idea"],
-        target_market=state["target_market"]
+        target_market=state["target_market"],
+        queries=state["research_plan"].customer_queries,
     )
-
-    print("\n========== CUSTOMER NODE END ==========")
 
     return {
         "customer_report": result["report"],
-
-        "sources": (
-            state.get("sources", [])
-            + result["sources"]
-        ),
-
-        "current_agent": "customer_research",
-
-        "errors": []
+        "sources": result["sources"],
     }
 
 def product_agent_node(state:ResearchState):
     print("\n========== PRODUCT STRATEGY NODE START ==========")
+    print("Pacing 35s for Groq TPM rate limits...")
+    time.sleep(35)
 
     result = product_strategy_agent(
         idea=state["idea"],
@@ -100,6 +86,8 @@ def product_agent_node(state:ResearchState):
 def evidence_critic_node(state: ResearchState):
 
     print("\n========== EVIDENCE CRITIC START ==========")
+    print("Pacing 35s for Groq TPM rate limits...")
+    time.sleep(35)
 
     result = evidence_critic_agent(
         market_report=state["market_report"],
@@ -123,6 +111,8 @@ def evidence_critic_node(state: ResearchState):
 def business_analysis_node(state: ResearchState):
 
     print("\n========== BUSINESS ANALYST START ==========")
+    print("Pacing 35s for Groq TPM rate limits...")
+    time.sleep(35)
 
     result = business_analyst_agent(
         market_report=state["market_report"],
