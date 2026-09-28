@@ -7,7 +7,7 @@ export const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 300000, // 5 minutes for multi-agent research pipeline
+  timeout: 600000, // 10 minutes for full multi-agent research pipeline
 });
 
 export default apiClient;

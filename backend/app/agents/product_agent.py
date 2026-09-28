@@ -1,4 +1,4 @@
-from app.agents.recursive_setup import llm
+from app.agents.recursive_setup import product_llm
 
 def product_strategy_agent(
     idea: str,
@@ -26,19 +26,15 @@ COMPETITOR RESEARCH:
 CUSTOMER RESEARCH:
 {customer_report}
 
-Using the research above, develop a product strategy.
-
-Analyze:
-
-1. Value proposition
-2. MVP features
-3. Feature priorities
-4. Product differentiators
-5. Market positioning
-6. Product recommendations
+Using the research above, develop a product strategy covering:
+- value_proposition (string)
+- mvp_features (list of strings)
+- feature_priorities (list of strings)
+- differentiators (list of strings)
+- positioning (string)
+- recommendations (list of strings)
 
 Important rules:
-
 - Base recommendations on the provided research.
 - Do not invent market statistics.
 - Do not invent competitors.
@@ -46,11 +42,11 @@ Important rules:
 - Clearly distinguish evidence-backed conclusions from assumptions.
 - Focus on actionable product strategy.
 
-Return a structured product strategy report.
+Return a structured product strategy report conforming to the schema.
 """
 
-    response = llm.invoke(prompt)
+    response = product_llm.invoke(prompt)
 
     return {
-        "report": response.content
+        "report": response
     }

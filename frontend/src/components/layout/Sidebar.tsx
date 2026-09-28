@@ -6,9 +6,6 @@ import {
   FileText, 
   Bookmark, 
   Settings, 
-  Zap, 
-  Sparkles,
-  ArrowUpRight,
   Bot
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -103,34 +100,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               7 parallel & critic research agents orchestrated for comprehensive market synthesis.
             </p>
           </div>
-        </div>
-
-        {/* Bottom Credits & Upgrade */}
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Research Credits</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">18 / 20</span>
-            </div>
-            <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-300"
-                style={{ width: '90%' }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500">Resets on 1st of next month</p>
-          </div>
-
-          <button
-            onClick={() => navigate('/settings?tab=billing')}
-            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-semibold transition-colors group"
-          >
-            <span className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              Upgrade Plan
-            </span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </button>
         </div>
       </aside>
     </>

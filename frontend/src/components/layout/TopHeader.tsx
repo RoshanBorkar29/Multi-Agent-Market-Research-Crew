@@ -5,16 +5,11 @@ import {
   Moon, 
   Sun, 
   History, 
-  Bell, 
   Settings, 
-  LogOut, 
-  ShieldCheck, 
   Menu, 
   ChevronDown
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
-import { Badge } from '../ui/Badge';
-import { checkBackendHealth } from '../../api/research';
 
 interface TopHeaderProps {
   onToggleSidebar?: () => void;
@@ -29,33 +24,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 }) => {
   const { isDark, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [backendStatus, setBackendStatus] = useState<'connected' | 'offline' | 'checking'>('checking');
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  // Real health check
-  useEffect(() => {
-    let isMounted = true;
-    const verifyHealth = async () => {
-      try {
-        const res = await checkBackendHealth();
-        if (isMounted) {
-          setBackendStatus(res.status === 'healthy' ? 'connected' : 'offline');
-        }
-      } catch {
-        if (isMounted) {
-          setBackendStatus('offline');
-        }
-      }
-    };
-
-    verifyHealth();
-    const interval = setInterval(verifyHealth, 30000); // Check every 30s
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -100,7 +70,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           </Link>
         </div>
 
-        {/* Center: Contextual Active Status & Health */}
+        {/* Center: Contextual Active Status */}
         <div className="hidden md:flex items-center gap-3">
           {activeReportTitle && (
             <div className="flex items-center gap-2 max-w-md truncate px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-xs">
@@ -120,26 +90,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </span>
             </div>
           )}
-
-          {/* Backend Status Indicator */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold bg-slate-50 dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700/60">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                backendStatus === 'connected'
-                  ? 'bg-emerald-500'
-                  : backendStatus === 'offline'
-                  ? 'bg-rose-500'
-                  : 'bg-amber-500 animate-pulse'
-              }`}
-            />
-            <span className="text-slate-600 dark:text-slate-300">
-              {backendStatus === 'connected'
-                ? 'Backend connected'
-                : backendStatus === 'offline'
-                ? 'Backend offline'
-                : 'Checking backend...'}
-            </span>
-          </div>
         </div>
 
         {/* Right Actions */}

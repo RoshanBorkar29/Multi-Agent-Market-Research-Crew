@@ -12,23 +12,19 @@ from app.graph.nodes import (
     research_planner_node
 )
 
-def evidence_router(state:ResearchState):
-    report=state.get("evidence_report","")
-    iterations=state.get("research_iterations",0)
+def evidence_router(state: ResearchState):
+    report = state.get("evidence_report", "")
+    iterations = state.get("research_iterations", 0)
 
-    if iterations>=2:
-        print(
-            "\nMaximum research iterations reached."
-        )
-
+    if iterations >= 1:
+        print("\nResearch cycle completed -> proceeding to business analysis.")
         return "business_analysis"
 
+    report_text = str(report).lower().replace(" ", "").replace("\n", "")
+    if "valid:true" in report_text or "valid:yes" in report_text:
+        return "business_analysis"
 
-    report_text=str(report).lower()
-    if "valid:true" in report_text:
-           return "business_analysis"
-    
-    return "research"
+    return "business_analysis"
 
 
 def build_graph():

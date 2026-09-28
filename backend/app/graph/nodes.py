@@ -63,8 +63,8 @@ def customer_research_node(state: ResearchState):
 
 def product_agent_node(state:ResearchState):
     print("\n========== PRODUCT STRATEGY NODE START ==========")
-    print("Pacing 35s for Groq TPM rate limits...")
-    time.sleep(35)
+    print("Pacing 2s for rate limits...")
+    time.sleep(2)
 
     result = product_strategy_agent(
         idea=state["idea"],
@@ -86,8 +86,8 @@ def product_agent_node(state:ResearchState):
 def evidence_critic_node(state: ResearchState):
 
     print("\n========== EVIDENCE CRITIC START ==========")
-    print("Pacing 35s for Groq TPM rate limits...")
-    time.sleep(35)
+    print("Pacing 2s for rate limits...")
+    time.sleep(2)
 
     result = evidence_critic_agent(
         market_report=state["market_report"],
@@ -111,8 +111,8 @@ def evidence_critic_node(state: ResearchState):
 def business_analysis_node(state: ResearchState):
 
     print("\n========== BUSINESS ANALYST START ==========")
-    print("Pacing 35s for Groq TPM rate limits...")
-    time.sleep(35)
+    print("Pacing 2s for rate limits...")
+    time.sleep(2)
 
     result = business_analyst_agent(
         market_report=state["market_report"],

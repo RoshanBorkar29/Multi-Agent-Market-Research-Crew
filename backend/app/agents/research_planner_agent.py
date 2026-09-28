@@ -1,8 +1,5 @@
-from app.agents.recursive_setup import llm
-
+from app.agents.recursive_setup import planner_llm
 from app.schemas.research import ResearchPlan
-
-structured_llm = llm.with_structured_output(ResearchPlan, method="json_mode")
 
 def research_planner_agent(idea:str,target_market:str)->ResearchPlan:
     prompt = f"""
@@ -36,4 +33,4 @@ Return only a valid JSON object matching the ResearchPlan schema with fields:
 - customer_queries: list of exactly 3 search query strings
 """
 
-    return structured_llm.invoke(prompt)
+    return planner_llm.invoke(prompt)
