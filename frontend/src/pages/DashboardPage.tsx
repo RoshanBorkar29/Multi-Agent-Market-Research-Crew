@@ -31,12 +31,6 @@ export const DashboardPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleRefreshResearch = () => {
-    if (research?.idea && research?.target_market) {
-      handleStartResearch(research.idea, research.target_market);
-    }
-  };
-
   return (
     <div className="w-full flex-1 space-y-8 min-w-0">
       {/* 1. Input Form Section (Shown when starting or creating new research) */}
@@ -79,7 +73,6 @@ export const DashboardPage: React.FC = () => {
         <ResearchWorkspace
           report={research}
           onNewResearch={handleNewResearch}
-          onRefreshResearch={handleRefreshResearch}
           isLoading={isLoading}
         />
       )}

@@ -29,3 +29,8 @@ python-dotenv
 
 # HTTP / async
 httpx
+
+# Database & Vector Store
+sqlalchemy[asyncio]>=2.0.0
+asyncpg
+pgvector

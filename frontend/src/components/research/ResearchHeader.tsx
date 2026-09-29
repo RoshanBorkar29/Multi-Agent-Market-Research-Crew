@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Sparkles, 
-  RotateCw, 
   PlusCircle, 
   FileCode, 
   Copy, 
@@ -14,14 +13,12 @@ import { ResearchResponse } from '../../types/research';
 interface ResearchHeaderProps {
   report: ResearchResponse;
   onNewResearch: () => void;
-  onRefreshResearch?: () => void;
   isLoading?: boolean;
 }
 
 export const ResearchHeader: React.FC<ResearchHeaderProps> = ({
   report,
   onNewResearch,
-  onRefreshResearch,
   isLoading = false,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -120,19 +117,6 @@ Generated autonomously via MarketMind AI Multi-Agent Backend.`;
             <PlusCircle className="w-4 h-4" />
             <span>New Research</span>
           </button>
-
-          {onRefreshResearch && (
-            <button
-              type="button"
-              onClick={onRefreshResearch}
-              disabled={isLoading}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-xs transition-all cursor-pointer disabled:opacity-50"
-              title="Refresh Research"
-            >
-              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-          )}
 
           <button
             type="button"

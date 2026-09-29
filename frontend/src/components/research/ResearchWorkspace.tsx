@@ -14,14 +14,12 @@ import { AskMarketMindButton } from './AskMarketMindButton';
 interface ResearchWorkspaceProps {
   report: ResearchResponse;
   onNewResearch: () => void;
-  onRefreshResearch?: () => void;
   isLoading?: boolean;
 }
 
 export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({
   report,
   onNewResearch,
-  onRefreshResearch,
   isLoading = false,
 }) => {
   return (
@@ -30,7 +28,6 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({
       <ResearchHeader
         report={report}
         onNewResearch={onNewResearch}
-        onRefreshResearch={onRefreshResearch}
         isLoading={isLoading}
       />
 

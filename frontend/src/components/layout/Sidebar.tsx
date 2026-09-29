@@ -5,8 +5,7 @@ import {
   LayoutDashboard, 
   FileText, 
   Bookmark, 
-  Settings, 
-  Bot
+  Settings
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -85,21 +84,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               );
             })}
           </nav>
-
-          {/* Agent Swarm Info Badge */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/60 dark:to-slate-800/20 border border-slate-200/60 dark:border-slate-700/60">
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="p-1 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
-                <Bot className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                LangGraph Agents
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              7 parallel & critic research agents orchestrated for comprehensive market synthesis.
-            </p>
-          </div>
         </div>
       </aside>
     </>
