@@ -146,4 +146,5 @@ vectorstore/
 
 uploads/
 generated/
-reports/
+/reports/
+!frontend/src/components/reports/
