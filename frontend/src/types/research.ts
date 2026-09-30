@@ -74,6 +74,7 @@ export interface SourceItem {
 }
 
 export interface ResearchResponse {
+  id?: string;
   idea: string;
   target_market: string;
   research_plan: ResearchPlan;
@@ -87,4 +88,23 @@ export interface ResearchResponse {
 export interface ResearchRequest {
   idea: string;
   target_market: string;
+}
+
+export interface ChatSourceItem {
+  content: string;
+  section: string;
+  similarity_score?: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: ChatSourceItem[];
+  timestamp: string;
+}
+
+export interface ChatResponse {
+  answer: string;
+  sources: ChatSourceItem[];
 }

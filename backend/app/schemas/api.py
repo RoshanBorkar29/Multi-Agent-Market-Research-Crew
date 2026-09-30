@@ -1,3 +1,4 @@
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.reports import (
@@ -23,6 +24,7 @@ class ResearchRequest(BaseModel):
 
 
 class ResearchResponse(BaseModel):
+    id: Optional[str] = None
     idea: str
     target_market: str
     research_plan: ResearchPlan
@@ -31,3 +33,12 @@ class ResearchResponse(BaseModel):
     customer_report: CustomerReport | None = None
     product_strategy: ProductStrategy | None = None
     sources: list[dict] = []
+
+
+class ChatRequest(BaseModel):
+    question: str = Field(..., description="The question to ask regarding the market research report")
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: List[Dict[str, Any]] = []

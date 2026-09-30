@@ -1,8 +1,12 @@
 import os
 import logging
+from dotenv import load_dotenv, find_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
+
+# Explicitly load environment variables from root or current dir
+load_dotenv(find_dotenv())
 
 logger = logging.getLogger(__name__)
 
@@ -33,18 +37,25 @@ async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
 
-# Initialize pgvector extension and create tables safely
+# Initialize tables safely
 async def init_db():
     if not DATABASE_URL or engine is None:
         logger.info("DATABASE_URL not configured. Skipping database initialization.")
         return
 
+    # Attempt to enable vector extension if supported
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            await conn.commit()
+    except Exception:
+        pass  # Native Windows postgres without compiled extension will skip this gracefully
+
+    # Create all tables (reports, report_embeddings, saved_ideas)
     try:
         async with engine.begin() as conn:
-            # Enable vector extension
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-            # Create all tables
+            from app.db import models  # Ensure all model tables are imported
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database initialized successfully.")
+        logger.info("Database tables initialized successfully.")
     except Exception as e:
-        logger.warning(f"Database connection skipped or failed: {e}")
+        logger.warning(f"Database table creation failed: {e}")

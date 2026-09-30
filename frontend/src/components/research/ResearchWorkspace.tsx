@@ -70,8 +70,8 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({
         />
       </div>
 
-      {/* 4. Future AI Assistant Floating Placeholder */}
-      <AskMarketMindButton />
+      {/* 4. AI Assistant Floating RAG Copilot */}
+      <AskMarketMindButton report={report} />
     </div>
   );
 };

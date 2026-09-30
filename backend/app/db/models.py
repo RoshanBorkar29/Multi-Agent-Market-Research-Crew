@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from pgvector.sqlalchemy import Vector
 from app.db.database import Base
 
 class Report(Base):
@@ -25,7 +24,7 @@ class Report(Base):
 
 
 class ReportEmbedding(Base):
-    """Stores chunked sections of reports with embeddings for RAG Chatbot."""
+    """Stores chunked sections of reports with vector embeddings for RAG Chatbot."""
     __tablename__ = "report_embeddings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -33,8 +32,8 @@ class ReportEmbedding(Base):
     section = Column(String(100), nullable=False)  # e.g., 'market', 'competitor', 'customer'
     content = Column(Text, nullable=False)
     
-    # Vector column (768 for Gemini/SentenceTransformers or 1536 for OpenAI)
-    embedding = Column(Vector(768), nullable=False)
+    # Vector embeddings stored as high-precision float array in JSON
+    embedding = Column(JSON, nullable=False)
 
 
 class SavedIdea(Base):
