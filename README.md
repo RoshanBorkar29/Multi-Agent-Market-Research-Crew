@@ -8,10 +8,8 @@
 
 The system is deployed and accessible across the following cloud infrastructure:
 
-- **Frontend Application**: Deployed on **[Vercel](https://vercel.com)** (React 18 + TypeScript + Vite SPA)
-- **Backend API Gateway**: Deployed on **[Render / Railway](https://render.com)** (FastAPI Async ASGI Application)
-- **Database & Vector Store**: Hosted on **[Supabase / Neon](https://supabase.com)** (PostgreSQL 16 with native `pgvector` extension)
-- **LLM Inference & Search**: Powered by **[Groq Cloud](https://groq.com)** (Llama 3 / Mixtral for ultra-low latency inference) and **[Tavily Search API](https://tavily.com)** for grounded web intelligence.
+- **Deployed Application**: Deployed on **[Vercel](https://multi-agent-market-research-crew-clddh0n7x-roshanborkar29.vercel.app/)** (React 18 + TypeScript + Vite SPA)
+
 
 ---
 
@@ -27,33 +25,8 @@ Validating business ideas and generating comprehensive market research typically
 
 The application is structured into four cohesive layers: modern web frontend, asynchronous API gateway, multi-agent state graph orchestrator, and a persistent hybrid relational + vector storage engine.
 
-```
-+----------------------------------------------------------------------------------------------------+
-| 1. User Interface (React 18 + TypeScript + Vite + Tailwind CSS)                                    |
-|    - Research Workspace     - Interactive Dashboard     - Ask MarketMind (RAG Chat) - Saved Ideas  |
-+-------------------------------------------------+--------------------------------------------------+
-                                                  | HTTP / REST & Streaming
-                                                  v
-+----------------------------------------------------------------------------------------------------+
-| 2. API & Orchestration Gateway (FastAPI Async Engine)                                              |
-|    - /api/research          - /api/reports/{id}         - /api/reports/{id}/chat    - /api/ideas   |
-+-------------------------------------------------+--------------------------------------------------+
-                                                  | StateGraph Invocation
-                                                  v
-+----------------------------------------------------------------------------------------------------+
-| 3. Multi-Agent Crew (LangGraph Orchestration State Machine)                                         |
-|    [Research Planner] -> [Parallel Fan-Out: Market Agent | Competitor Agent | Customer Agent]     |
-|                       -> [Product Strategy Agent] -> [Evidence Critic Agent (Validation Loop)]     |
-|                       -> [Business Analysis Agent] -> Final Synthesized Intelligence State         |
-+-------------------------------------------------+--------------------------------------------------+
-                                                  | Async Persistence & Embeddings
-                                                  v
-+----------------------------------------------------------------------------------------------------+
-| 4. Persistence & Vector Knowledge Base                                                             |
-|    - PostgreSQL (Reports, Chunks, Bookmarks)    - pgvector / Qdrant Embeddings Store               |
-|    - Tavily Search API & Web Scraper Tools      - Groq LLM Ultra-Fast Inference Engine             |
-+----------------------------------------------------------------------------------------------------+
-```
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/dc8f6735-63ce-4053-9221-0f2b24165271" />
+
 
 ### 🖼️ Architecture Diagram
 <!-- Place your System Architecture Diagram below -->
@@ -106,13 +79,7 @@ The frontend is built with **React 18**, **TypeScript**, **Vite**, and **Tailwin
 - **Ask MarketMind (RAG Chat)**: A slide-over / floating intelligent copilot allowing founders to ask specific questions about any report section, backed by pgvector semantic retrieval.
 - **Saved Ideas & History**: Bookmark and compare past market analyses side-by-side.
 
-### 🖼️ Frontend Showcase
-<!-- Place your Frontend Screenshots below -->
-#### 1. Research Workspace & Launchpad
-![Frontend Research Workspace](assets/frontend-workspace.png)
 
-#### 2. Interactive Analytics Dashboard & "Ask MarketMind" Assistant
-![MarketMind Dashboard](assets/dashboard-rag.png)
 
 ---
 
