@@ -12,7 +12,7 @@ The system is deployed and accessible across the following cloud infrastructure:
 
 
 ---
-##SOME PARTS NOT IMPLEMENTED BUT ARE ON YOU->
+##SOME PARTS NOT IMPLEMENTED ->
 1.Research report history saving is not implemented yet->so it will be blank for now!!
 
 ##NOTE->FRONTEND GENERATED USING ANTIGRAVTY TOOL
