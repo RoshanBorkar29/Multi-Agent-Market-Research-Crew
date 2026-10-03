@@ -94,10 +94,10 @@ The frontend is built with **React 18**, **TypeScript**, **Vite**, and **Tailwin
 | **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts, Axios |
 | **Backend & API** | FastAPI, Python 3.11+, Uvicorn, Pydantic v2, Pydantic Settings |
 | **Multi-Agent Orchestration** | LangGraph, LangGraph Checkpoint, LangChain Core |
-| **LLM & Inference** | Groq (`langchain-groq`), Llama-3.3-70b-versatile, OpenAI / Gemini fallback |
+| **LLM & Inference** | Groq (`langchain-groq`), openai/gpt-oss-120b, OpenAI / Gemini fallback |
 | **Web Research & Tools** | Tavily Python SDK, BeautifulSoup4, Requests, HTTPX |
 | **Database & ORM** | PostgreSQL, SQLAlchemy 2.0 (AsyncIO), asyncpg, pgvector |
-| **Deployment & Cloud** | Vercel (Frontend), Render / Railway (Backend), Supabase / Neon (Database) |
+| **Deployment & Cloud** | Vercel (Frontend), Render (Backend),  |
 
 ---
 
